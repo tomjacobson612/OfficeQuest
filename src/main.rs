@@ -1,3 +1,7 @@
+mod models;
+use models::card;
+
 fn main() {
-    println!("Hello, world!");
+    let test_card = card::friday_meeting();
+    test_card.print();
 }
