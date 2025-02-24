@@ -18,6 +18,7 @@ impl Card {
     }
 }
 
+//Specific Card Constructors
 pub fn friday_meeting() -> Card {
     Card {
         name: "Friday Meeting".to_string(),
@@ -26,5 +27,16 @@ pub fn friday_meeting() -> Card {
         self_damage: 2,
         textbox: "Deal 4 damage to any target, take 2 damage.".to_string(),
         flavor_text: "Who scheduled the meeting for Friday at 5pm?".to_string(),
+    }
+}
+
+pub fn pizza_party() -> Card {
+    Card {
+        name: "Pizza Party".to_string(),
+        mana_cost: 2,
+        damage: 0,
+        self_damage: -2,
+        textbox: "Gain 2 health.".to_string(),
+        flavor_text: "In lieue of quarterly bonuses corporate is giving us a Pizza Party!".to_string(),
     }
 }
