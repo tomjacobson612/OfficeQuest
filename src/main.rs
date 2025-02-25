@@ -7,21 +7,24 @@ use ggez::*;
 use ggez::input::keyboard;
 
 fn main() {
-    let test_card: Card = card::friday_meeting();
     let test_card2: Card = card::friday_meeting();
 
     let test_player = Player {
         name: String::from("Tom"),
         hp: 10,
+        hp_max: 10,
         energy: 3,
+        energy_max: 3,
         hand: vec![test_card2, card::pizza_party()],
-        deck: vec![test_card],
+        deck: vec![],
+        discard: vec![],
         hand_displayed: false,
     };
 
     let test_enemy = Enemy {
         name: String::from("HR Rep"),
         hp: 5,
+        actions: vec![],
     };
 
     let state = State {
@@ -43,7 +46,6 @@ fn main() {
 pub enum Turn {
     PlayerTurn,
     EnemyTurn,
-    //CombatEnd,
     GameOver,
 }
 
@@ -59,7 +61,8 @@ impl State{
             println!("Turn: {:?}", turn);
             println!("------------------");
         }
-        println!("Player Health: {}", self.player.hp);
+        println!("Current Energy: {}/{}", self.player.energy, self.player.energy_max);
+        println!("Player Health: {}/{}", self.player.hp, self.player.hp_max);
         println!("Enemy Health: {}", self.enemy.hp);
         println!("------------------");
     }
@@ -67,18 +70,16 @@ impl State{
 
 impl ggez::event::EventHandler<GameError> for State {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
-        let prev_turn = self.turn.clone();
         match self.turn {
             None => {todo!()}
             Some(Turn::PlayerTurn) => {
                 if self.player.hand_displayed == false{
                     self.print_game_state();
-                    self.player.display_energy();
                     self.player.print_hand();
                     self.player.hand_displayed = true;
                 }
 
-                for (key, idx) in [
+                for (key, i) in [
                     (keyboard::KeyCode::Key1, 0),
                     (keyboard::KeyCode::Key2, 1),
                     (keyboard::KeyCode::Key3, 2),
@@ -90,22 +91,21 @@ impl ggez::event::EventHandler<GameError> for State {
                     (keyboard::KeyCode::Key9, 8),
                 ].iter(){
                     if ctx.keyboard.is_key_just_pressed(*key) {
-                        if idx < &self.player.hand.len() {
-                            println!("Index: {}", idx);
-                            self.player.play_card(&mut self.enemy, *idx);
+                        //Ensures valid hand.
+                        if i < &self.player.hand.len() {
+                            self.player.play_card(&mut self.enemy, *i);
                             self.print_game_state();
                             self.player.hand_displayed = false;
                         } else {
                             println!("Invalid card selection.");
                         }
-                        break;
-                    }
+                        break;}
                 }
 
                 //End Player Turn Button
                 if ctx.keyboard.is_key_just_pressed(keyboard::KeyCode::Space) {
                     println!("You end your turn.");
-                    self.player.energy = 3;
+                    self.player.energy = self.player.energy_max;
                     self.player.hand_displayed = false;
                     self.turn = Some(Turn::EnemyTurn);
                 }
@@ -125,6 +125,6 @@ impl ggez::event::EventHandler<GameError> for State {
         Ok(())
     }
 
-    fn draw(&mut self, ctx: &mut Context) -> GameResult {
+    fn draw(&mut self, _ctx: &mut Context) -> GameResult {
         Ok(())}
 }

@@ -8,13 +8,20 @@ pub struct Card {
 }
 
 impl Card {
-    pub fn print(&self) {
+    pub fn print_all(&self) {
         println!("Card Name: {}", self.name);
         println!("Mana Cost: {}", self.mana_cost);
         println!("Damage: {}", self.damage);
         println!("Self Damage: {}", self.self_damage);
         println!("Textbox: {}", self.textbox);
         println!("Flavor Text: \"{}\"", self.flavor_text);
+    }
+
+    pub fn print_player_view(&self) {
+        println!("Card Name: {}", self.name);
+        println!("Mana Cost: {}", self.mana_cost);
+        println!("Textbox: {}", self.textbox);
+        println!("Flavor Text: \"{}\"", self.flavor_text); 
     }
 }
 
@@ -36,7 +43,7 @@ pub fn pizza_party() -> Card {
         mana_cost: 2,
         damage: 0,
         self_damage: -2,
-        textbox: "Gain 2 health.".to_string(),
+        textbox: "Heal 2hp.".to_string(),
         flavor_text: "In lieue of quarterly bonuses corporate is giving us a Pizza Party!".to_string(),
     }
 }
