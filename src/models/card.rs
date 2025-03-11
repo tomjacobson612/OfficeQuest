@@ -34,8 +34,7 @@ pub fn friday_meeting() -> Card {
         self_damage: 2,
         textbox: "Deal 4 damage to any target, take 2 damage.".to_string(),
         flavor_text: "Who scheduled the meeting for Friday at 5pm?".to_string(),
-    }
-}
+    }}
 
 pub fn pizza_party() -> Card {
     Card {
@@ -45,5 +44,4 @@ pub fn pizza_party() -> Card {
         self_damage: -2,
         textbox: "Heal 2hp.".to_string(),
         flavor_text: "In lieue of quarterly bonuses corporate is giving us a Pizza Party!".to_string(),
-    }
-}
+    }}
