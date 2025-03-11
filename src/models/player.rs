@@ -23,10 +23,11 @@ impl Player {
     }
 
     pub fn print_hand(&self){
-        let position: u32 = 0;
+        let mut position: u32 = 1;
         println!("{}'s Hand:", self.name);
         for card in &self.hand {
-            println!("POSITION: {}", position);
+            println!("Press {} to play card.", position);
+            position += 1;
             card.print_player_view();
             println!("*********************************");
         }
