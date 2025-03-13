@@ -54,7 +54,6 @@ fn main() {
 pub enum Turn {
     PlayerTurn,
     EnemyTurn,
-    GameOver,
 }
 
 pub struct State {
@@ -122,7 +121,7 @@ impl State{
                 return Ok(());
             }
         }
-
+        //End Player Turn
         if  ctx.keyboard.is_key_just_pressed(keyboard::KeyCode::Space) {
             println!("You end your turn.");
             self.player.energy = self.player.energy_max;
