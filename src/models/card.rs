@@ -1,3 +1,4 @@
+#[derive(Debug, PartialEq, Clone)]
 pub struct Card {
     pub name: String,
     pub mana_cost: i32,

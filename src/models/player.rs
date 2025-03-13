@@ -44,5 +44,18 @@ impl Player {
             self.energy -= card.mana_cost;
             self.hp -= card.self_damage;
             enemy.hp -= card.damage;
+        }
     }
-}}
+
+    pub fn is_alive(&self) -> bool {
+        self.hp > 0
+    }
+
+    pub fn take_damage(&mut self, damage: i32) {
+        if self.is_alive(){self.hp = (self.hp - damage).max(0);}
+    }
+    
+    pub fn heal(&mut self, amount: i32){
+        self.hp = (self.hp + amount).min(self.hp_max);
+    }
+}

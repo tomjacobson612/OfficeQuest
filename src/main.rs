@@ -37,7 +37,7 @@ fn main() {
         player: test_player,
         enemy: test_enemy,
         turn: Some(Turn::PlayerTurn),
-        event_list: vec![Event::audit()],
+        event_list: vec![Event::skip_lunch()],
         current_event: None, 
         event_in_progress: false, 
     };
@@ -131,14 +131,23 @@ impl State{
         Ok(())
     }
 
-    fn apply_event(&mut self, event: &Event) {
+    pub fn process_event(&mut self, event: &Event) {
         println!("Event: {}", event.name);
         println!("{}", event.event_flavor_text);
-        match event.effect {
-            EventEffect::GainHP => self.player.hp += 10,
-            EventEffect::LoseHP => self.player.hp -= 5,
-            EventEffect::GainMaxHp => self.player.energy_max += 1,
-            _ => println!("Effect not yet implemented"),
+        match &event.effect {
+            EventEffect::GainHP { amount } => self.player.heal(*amount),
+            EventEffect::LoseHP { amount } => {
+                self.player.take_damage(*amount);
+                if !self.player.is_alive() {self.state = GameState::GameOver;}}
+            EventEffect::GainMaxHp { amount } => {
+                self.player.hp_max += amount;
+                self.player.heal(*amount);}
+            EventEffect::GainGold { amount } => todo!(),
+            EventEffect::LoseGold { amount } => todo!(),
+            EventEffect::GainEnergyMax { amount } => self.player.energy_max += amount,
+            EventEffect::GainCard { card } => todo!(),
+            EventEffect::LoseCard { card } => todo!(),
+            EventEffect::GainCurse { card } => todo!(),
         }
     }
 
@@ -149,10 +158,10 @@ impl State{
         }
     }
 
-    fn handle_event(&mut self, ctx: &mut Context) -> GameResult {
+    fn resolve_event(&mut self, ctx: &mut Context) -> GameResult {
         if let Some(event) = self.current_event.clone() {
             if !self.event_in_progress { 
-                self.apply_event(&event);
+                self.process_event(&event);
                 println!("Press Spacebar to continue..."); 
                 self.event_in_progress = true;
             }
@@ -186,7 +195,7 @@ impl ggez::event::EventHandler<GameError> for State {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
         match self.state {
             GameState::Combat => self.handle_combat(ctx),
-            GameState::Event => self.handle_event(ctx),
+            GameState::Event => self.resolve_event(ctx),
             GameState::GameOver => {
                 println!("You lose :(");
                 Ok(())
