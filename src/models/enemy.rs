@@ -8,3 +8,9 @@ pub struct Enemy {
     pub hp: i32,
     pub actions: Vec<Intent>,
 }
+
+impl Enemy{
+    pub fn is_dead(&self) -> bool {
+        if self.hp <= 0{return true}else{return false}
+    }
+}

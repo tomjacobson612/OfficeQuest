@@ -40,11 +40,9 @@ impl Player {
         
         if self.energy < card.mana_cost{
             println!("You do not have enough energy to play that card!");
-            return;
         }else{
             self.energy -= card.mana_cost;
             self.hp -= card.self_damage;
             enemy.hp -= card.damage;
-            return;} 
     }
-}
+}}
