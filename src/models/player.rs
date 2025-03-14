@@ -11,6 +11,7 @@ pub struct Player {
     pub deck: Vec<Card>,
     pub discard: Vec<Card>,
     pub hand_displayed: bool,
+    pub persistent_effects: Vec<Card>,
 }
 
 impl Player {

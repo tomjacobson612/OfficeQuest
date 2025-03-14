@@ -1,5 +1,4 @@
 mod models;
-use models::card;
 use models::card::Card;
 use models::player::Player;
 use models::enemy::Enemy;
@@ -12,7 +11,7 @@ use rand::seq::SliceRandom;
 use rand::thread_rng;
 
 fn main() {
-    let test_card2: Card = card::friday_meeting();
+    let test_card2: Card = Card::friday_meeting();
 
     let test_player = Player {
         name: String::from("Tom"),
@@ -20,10 +19,11 @@ fn main() {
         hp_max: 10,
         energy: 3,
         energy_max: 3,
-        hand: vec![test_card2, card::pizza_party()],
+        hand: vec![test_card2, Card::pizza_party()],
         deck: vec![],
         discard: vec![],
         hand_displayed: false,
+        persistent_effects: vec![],
     };
 
     let test_enemy = Enemy {
@@ -37,7 +37,7 @@ fn main() {
         player: test_player,
         enemy: test_enemy,
         turn: Some(Turn::PlayerTurn),
-        event_list: vec![Event::skip_lunch()],
+        event_list: vec![Event::skip_lunch(), Event::quarterly_raise()],
         current_event: None, 
         event_in_progress: false, 
     };

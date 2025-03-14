@@ -38,6 +38,17 @@ impl  Event{
             "#
             .to_string(),
             effect: EventEffect::LoseHP {amount: 2},
-        }
-    }
+        }}
+
+    pub fn quarterly_raise() -> Event {
+        Event{
+            name: "Quarterly Raise".to_string(),
+            event_flavor_text: r#"
+            Your performance has been stellar this quarter, we would like
+            to offer you a 3% raise, adjusted for inflation.
+            Heal 2HP.
+            "#
+            .to_string(),
+            effect: EventEffect::GainHP { amount: 2 },
+        }}
 }
