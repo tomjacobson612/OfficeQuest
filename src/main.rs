@@ -37,7 +37,7 @@ fn main() {
         player: test_player,
         enemy: test_enemy,
         turn: Some(Turn::PlayerTurn),
-        event_list: vec![Event::skip_lunch(), Event::quarterly_raise()],
+        event_list: vec![Event::sketchy_janitor(), Event::quarterly_raise()],
         current_event: None, 
         event_in_progress: false, 
     };
@@ -134,7 +134,14 @@ impl State{
     pub fn process_event(&mut self, event: &Event) {
         println!("Event: {}", event.name);
         println!("{}", event.event_flavor_text);
-        match &event.effect {
+        if let Some(options) = &event.options {
+            for (i, option) in options.iter().enumerate() {
+                println!("{}: {}", i + 1, option.choice_text);
+            }}
+    }
+
+    pub fn apply_event_effects(&mut self, effect: &EventEffect){
+        match effect {
             EventEffect::GainHP { amount } => self.player.heal(*amount),
             EventEffect::LoseHP { amount } => {
                 self.player.take_damage(*amount);
@@ -148,6 +155,7 @@ impl State{
             EventEffect::GainCard { card } => todo!(),
             EventEffect::LoseCard { card } => todo!(),
             EventEffect::GainCurse { card } => todo!(),
+            EventEffect::None => todo!(),
         }
     }
 
@@ -160,19 +168,53 @@ impl State{
 
     fn resolve_event(&mut self, ctx: &mut Context) -> GameResult {
         if let Some(event) = self.current_event.clone() {
-            if !self.event_in_progress { 
+            if !self.event_in_progress {
                 self.process_event(&event);
-                println!("Press Spacebar to continue..."); 
+
+                if event.options.is_none() {
+                    println!("Press Spacebar to continue...");
+                }
                 self.event_in_progress = true;
             }
-
-            if ctx.keyboard.is_key_just_pressed(keyboard::KeyCode::Space) {
+    
+            if ctx.keyboard.is_key_just_pressed(keyboard::KeyCode::Space) && event.options.is_none() {
+                self.apply_event_effects(&event.effect);
                 self.current_event = None;
                 self.start_combat();
                 self.event_in_progress = false;
-            }
-        }
-        Ok(())
+    
+            } else if let Some(options) = &event.options {
+                for i in 0..options.len() {
+                    let key = match i {
+                        0 => keyboard::KeyCode::Key1,
+                        1 => keyboard::KeyCode::Key2,
+                        2 => keyboard::KeyCode::Key3,
+                        3 => keyboard::KeyCode::Key4,
+                        4 => keyboard::KeyCode::Key5,
+                        5 => keyboard::KeyCode::Key6,
+                        6 => keyboard::KeyCode::Key7,
+                        7 => keyboard::KeyCode::Key8,
+                        8 => keyboard::KeyCode::Key9,
+                        _ => unreachable!(),
+                    };
+    
+                    if ctx.keyboard.is_key_just_pressed(key) {
+                        if i < options.len() {
+                            self.apply_event_effects(&options[i].effect);
+                            println!("{}", options[i].outcome_text);
+                            let event = self.current_event.as_mut();
+                            event.unwrap().outcome_shown = true;
+                            println!("Press Spacebar to continue...");
+                        }
+                        break;}}
+                    }
+                    if ctx.keyboard.is_key_just_pressed(keyboard::KeyCode::Space) && event.outcome_shown {
+                        self.current_event = None;
+                        self.start_combat();
+                        self.event_in_progress = false;
+                    }
+                }
+            Ok(())
     }
 
     fn start_combat(&mut self) {
