@@ -15,15 +15,16 @@ pub struct Player {
 }
 
 impl Player {
+    #[allow(dead_code)]
     pub fn print_deck(&self) {
         println!("{}'s Deck:", self.name);
         for card in &self.deck {
-            card.print_all();
+            card.print_player_view();
             println!("------------------");
         }
     }
 
-    pub fn print_hand(&self){
+    pub fn print_hand(&self) {
         let mut position: u32 = 1;
         println!("{}'s Hand:", self.name);
         for card in &self.hand {
@@ -34,14 +35,14 @@ impl Player {
         }
     }
 
-    pub fn play_card(&mut self, enemy: &mut Enemy, hand_position: usize){
-            let card = self.hand.remove(hand_position);
-            println!("Chosen Card is: ");
-            card.print_player_view();
-        
-        if self.energy < card.mana_cost{
+    pub fn play_card(&mut self, enemy: &mut Enemy, hand_position: usize) {
+        let card = self.hand.remove(hand_position);
+        println!("Chosen Card is: ");
+        card.print_player_view();
+
+        if self.energy < card.mana_cost {
             println!("You do not have enough energy to play that card!");
-        }else{
+        } else {
             self.energy -= card.mana_cost;
             self.hp -= card.self_damage;
             enemy.hp -= card.damage;
@@ -53,10 +54,12 @@ impl Player {
     }
 
     pub fn take_damage(&mut self, damage: i32) {
-        if self.is_alive(){self.hp = (self.hp - damage).max(0);}
+        if self.is_alive() {
+            self.hp = (self.hp - damage).max(0);
+        }
     }
-    
-    pub fn heal(&mut self, amount: i32){
+
+    pub fn heal(&mut self, amount: i32) {
         self.hp = (self.hp + amount).min(self.hp_max);
     }
 }

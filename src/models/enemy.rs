@@ -1,7 +1,7 @@
-pub struct Intent {
-    pub damage: u32,
-    pub healing: u32,
-    pub status: Vec<String>,
+pub enum Intent {
+    Damage {amount: u32},
+    Healing {amount: u32},
+    Status,
 }
 pub struct Enemy {
     pub name: String,
@@ -9,8 +9,16 @@ pub struct Enemy {
     pub actions: Vec<Intent>,
 }
 
-impl Enemy{
+impl Enemy {
     pub fn is_dead(&self) -> bool {
-        if self.hp <= 0{return true}else{return false}
+        self.hp <= 0
+    }
+
+    pub fn hr_rep() -> Enemy {
+        Enemy { 
+            name: "HR Rep".to_string(), 
+            hp: 5, 
+            actions: vec![Intent::Damage {amount: 1}, Intent::Healing{amount: 1}]
+        }
     }
 }
