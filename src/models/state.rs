@@ -1,6 +1,7 @@
-use crate::models::enemy::Enemy;
+use crate::models::enemy::{Enemy, Intent};
 use crate::models::event::{Event, EventEffect};
 use crate::models::player::Player;
+use colored::*;
 use ggez::input::keyboard;
 use ggez::GameError;
 use ggez::{Context, GameResult};
@@ -21,6 +22,7 @@ pub struct State {
     pub event_list: Vec<Event>,
     pub current_event: Option<Event>,
     pub event_in_progress: bool,
+    pub turn_started: bool,
 }
 
 #[derive(Debug, PartialEq)]
@@ -37,15 +39,23 @@ impl State {
             println!("------------------");
         }
         println!(
-            "Current Energy: {}/{}",
-            self.player.energy, self.player.energy_max
+            "Player Health: {}",
+            format!("{}/{}", self.player.hp, self.player.hp_max).red()
         );
-        println!("Player Health: {}/{}", self.player.hp, self.player.hp_max);
-        println!("Enemy Health: {}", self.enemy.hp);
+        println!(
+            "Current Energy: {}",
+            format!("{}/{}", self.player.energy, self.player.energy_max).blue()
+        );
+        println!("Enemy Health: {}", format!("{}", self.enemy.hp).magenta());
         println!("------------------");
     }
 
-    fn handle_combat(&mut self, ctx: &mut Context) -> GameResult {
+    fn player_turn(&mut self, ctx: &mut Context) -> GameResult {
+        if !self.turn_started {
+            self.player.start_turn();
+            self.turn_started = true;
+        }
+
         if !self.player.hand_displayed {
             self.print_game_state();
             self.player.print_hand();
@@ -71,7 +81,10 @@ impl State {
                     self.player.play_card(&mut self.enemy, i);
                     self.print_game_state();
                     self.player.hand_displayed = false;
-                    if self.enemy.is_dead() {
+                    if !self.enemy.is_alive() {
+                        self.turn_started = false;
+                        self.enemy_turn();
+                        self.player.end_combat();
                         self.trigger_random_event();
                         return Ok(());
                     }
@@ -83,9 +96,10 @@ impl State {
         }
         //End Player Turn
         if ctx.keyboard.is_key_just_pressed(keyboard::KeyCode::Space) {
-            println!("You end your turn.");
-            self.player.energy = self.player.energy_max;
-            self.player.hand_displayed = false;
+            let text = "You end your turn.".yellow();
+            println!("{}", text);
+            self.player.end_turn();
+            self.turn_started = false;
             self.turn = Some(Turn::EnemyTurn);
         }
         Ok(())
@@ -184,16 +198,31 @@ impl State {
 
     fn start_combat(&mut self) {
         self.state = GameState::Combat;
-        self.player.energy = self.player.energy_max;
-        self.enemy.hp = 10;
+        self.turn = Some(Turn::PlayerTurn);
     }
 
     fn enemy_turn(&mut self) {
-        println!("Enemy attacks!");
-        println!("------------------");
-        self.player.hp -= 1;
-        if self.player.hp <= 0 {
-            self.state = GameState::GameOver;
+        if self.enemy.hp <= 0 {
+            println!("{}", format!("{} Defeated.", self.enemy.name).red());
+            self.enemy = Enemy::random_enemy();
+            self.state = GameState::Event;
+        } else if let Some(intent) = self.enemy.choose_random_intent().cloned() {
+            match intent {
+                Intent::Damage { amount } => {
+                    self.enemy.deal_damage(amount);
+                    self.player.take_damage(amount);
+                    if !self.player.is_alive() {
+                        let game_over = "You died.".red();
+                        println!("{}", game_over);
+                        self.state = GameState::GameOver;
+                    }
+                }
+                Intent::Healing { amount } => {
+                    self.enemy.heal(amount);
+                }
+            }
+        } else {
+            println!("Enemy can't move!");
         }
     }
 }
@@ -202,19 +231,16 @@ impl ggez::event::EventHandler<GameError> for State {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
         match self.state {
             GameState::Combat => {
-                if self.turn == Some(Turn::PlayerTurn){
-                    self.handle_combat(ctx)?;
+                if self.turn == Some(Turn::PlayerTurn) {
+                    self.player_turn(ctx)?;
                 } else {
                     self.enemy_turn();
                     self.turn = Some(Turn::PlayerTurn);
                 }
                 Ok(())
-            },
-            GameState::Event => self.resolve_event(ctx),
-            GameState::GameOver => {
-                println!("You lose :(");
-                Ok(())
             }
+            GameState::Event => self.resolve_event(ctx),
+            GameState::GameOver => Ok(()),
         }
     }
 
