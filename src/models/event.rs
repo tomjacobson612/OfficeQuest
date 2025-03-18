@@ -12,11 +12,11 @@ pub struct Event {
 pub enum EventEffect {
     GainHP { amount: i32 },
     LoseHP { amount: i32 },
-    GainMaxHp { amount: i32 },
-    GainEnergyMax { amount: i32 },
-    GainCard { card: Card },
-    LoseCard { card: Card },
-    GainCurse { card: Card },
+    _GainMaxHp { amount: i32 },
+    _GainEnergyMax { amount: i32 },
+    _GainCard { card: Card },
+    _LoseCard { card: Card },
+    _GainCurse { card: Card },
     None,
 }
 

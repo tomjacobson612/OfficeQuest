@@ -46,7 +46,7 @@ impl Enemy {
     }
 
     pub fn random_enemy() -> Enemy {
-        return Enemy::hr_rep();
+        Enemy::hr_rep()
     }
 
     pub fn hr_rep() -> Enemy {

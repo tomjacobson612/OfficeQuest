@@ -13,7 +13,7 @@ pub struct Player {
     pub deck: Vec<Card>,
     pub discard: Vec<Card>,
     pub hand_displayed: bool,
-    pub persistent_effects: Vec<Card>,
+    pub _persistent_effects: Vec<Card>,
 }
 
 impl Player {
@@ -26,6 +26,7 @@ impl Player {
         }
     }
 
+    #[allow(dead_code)]
     pub fn print_discard(&self) {
         println!("{}'s Discard:", self.name);
         for card in &self.discard {
@@ -116,5 +117,27 @@ impl Player {
         let mut rng = thread_rng();
         self.deck.shuffle(&mut rng);
         self.hand_displayed = false;
+    }
+
+    pub fn create_test_player() -> Player {
+        Player {
+            name: String::from("Test Player"),
+            hp: 10,
+            hp_max: 10,
+            energy: 3,
+            energy_max: 3,
+            hand: vec![],
+            deck: vec![
+                Card::friday_meeting(),
+                Card::pizza_party(),
+                Card::water_cooler(),
+                Card::friday_meeting(),
+                Card::pizza_party(),
+                Card::water_cooler(),
+            ],
+            discard: vec![],
+            hand_displayed: false,
+            _persistent_effects: vec![],
+        }
     }
 }

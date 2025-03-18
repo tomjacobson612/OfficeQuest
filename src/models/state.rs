@@ -46,8 +46,17 @@ impl State {
             "Current Energy: {}",
             format!("{}/{}", self.player.energy, self.player.energy_max).blue()
         );
-        println!("Enemy Health: {}", format!("{}", self.enemy.hp).magenta());
+        println!(
+            "{} Health: {}",
+            self.enemy.name,
+            format!("{}", self.enemy.hp).magenta()
+        );
         println!("------------------");
+    }
+
+    fn start_combat(&mut self) {
+        self.state = GameState::Combat;
+        self.turn = Some(Turn::PlayerTurn);
     }
 
     fn player_turn(&mut self, ctx: &mut Context) -> GameResult {
@@ -105,6 +114,31 @@ impl State {
         Ok(())
     }
 
+    fn enemy_turn(&mut self) {
+        if self.enemy.hp <= 0 {
+            println!("{}", format!("{} Defeated.", self.enemy.name).red());
+            self.enemy = Enemy::random_enemy();
+            self.state = GameState::Event;
+        } else if let Some(intent) = self.enemy.choose_random_intent().cloned() {
+            match intent {
+                Intent::Damage { amount } => {
+                    self.enemy.deal_damage(amount);
+                    self.player.take_damage(amount);
+                    if !self.player.is_alive() {
+                        let game_over = "You died.".red();
+                        println!("{}", game_over);
+                        self.state = GameState::GameOver;
+                    }
+                }
+                Intent::Healing { amount } => {
+                    self.enemy.heal(amount);
+                }
+            }
+        } else {
+            println!("Enemy can't move!");
+        }
+    }
+
     pub fn process_event(&mut self, event: &Event) {
         println!("Event: {}", event.name);
         println!("{}", event.event_flavor_text);
@@ -124,14 +158,14 @@ impl State {
                     self.state = GameState::GameOver;
                 }
             }
-            EventEffect::GainMaxHp { amount } => {
+            EventEffect::_GainMaxHp { amount } => {
                 self.player.hp_max += amount;
                 self.player.heal(*amount);
             }
-            EventEffect::GainEnergyMax { amount } => self.player.energy_max += amount,
-            EventEffect::GainCard { card: _ } => todo!(),
-            EventEffect::LoseCard { card: _ } => todo!(),
-            EventEffect::GainCurse { card: _ } => todo!(),
+            EventEffect::_GainEnergyMax { amount } => self.player.energy_max += amount,
+            EventEffect::_GainCard { card: _ } => todo!(),
+            EventEffect::_LoseCard { card: _ } => todo!(),
+            EventEffect::_GainCurse { card: _ } => todo!(),
             EventEffect::None => todo!(),
         }
     }
@@ -196,33 +230,20 @@ impl State {
         Ok(())
     }
 
-    fn start_combat(&mut self) {
-        self.state = GameState::Combat;
-        self.turn = Some(Turn::PlayerTurn);
-    }
-
-    fn enemy_turn(&mut self) {
-        if self.enemy.hp <= 0 {
-            println!("{}", format!("{} Defeated.", self.enemy.name).red());
-            self.enemy = Enemy::random_enemy();
-            self.state = GameState::Event;
-        } else if let Some(intent) = self.enemy.choose_random_intent().cloned() {
-            match intent {
-                Intent::Damage { amount } => {
-                    self.enemy.deal_damage(amount);
-                    self.player.take_damage(amount);
-                    if !self.player.is_alive() {
-                        let game_over = "You died.".red();
-                        println!("{}", game_over);
-                        self.state = GameState::GameOver;
-                    }
-                }
-                Intent::Healing { amount } => {
-                    self.enemy.heal(amount);
-                }
-            }
-        } else {
-            println!("Enemy can't move!");
+    pub fn create_test_state(test_player: Player, test_enemy: Enemy) -> State {
+        State {
+            state: GameState::Combat,
+            player: test_player,
+            enemy: test_enemy,
+            turn: Some(Turn::PlayerTurn),
+            event_list: vec![
+                Event::sketchy_janitor(),
+                Event::quarterly_raise(),
+                Event::skip_lunch(),
+            ],
+            current_event: None,
+            event_in_progress: false,
+            turn_started: false,
         }
     }
 }
