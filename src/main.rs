@@ -7,7 +7,7 @@ use models::player::Player;
 use models::state::State;
 fn main() {
     let test_player = Player::create_test_player();
-    let test_enemy = Enemy::hr_rep();
+    let test_enemy = Enemy::random_enemy();
 
     let state = State::create_test_state(test_player, test_enemy);
 

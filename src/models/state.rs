@@ -33,6 +33,13 @@ pub enum GameState {
 }
 
 impl State {
+    /// Prints the current game state.
+    /// # Example
+    /// ```
+    /// Player Health: 10/10
+    /// Current Energy 3/3
+    /// Enemy Health 4/4
+    /// ```
     fn print_game_state(&self) {
         if let Some(turn) = self.turn.as_ref() {
             println!("Turn: {:?}", turn);
@@ -47,18 +54,23 @@ impl State {
             format!("{}/{}", self.player.energy, self.player.energy_max).blue()
         );
         println!(
-            "{} Health: {}",
+            "{}'s Health: {}",
             self.enemy.name,
             format!("{}", self.enemy.hp).magenta()
         );
         println!("------------------");
     }
 
+    /// Sets state to combat and turn to player turn (player is always first). Shuffles players deck.
     fn start_combat(&mut self) {
         self.state = GameState::Combat;
         self.turn = Some(Turn::PlayerTurn);
+
+        let mut rng = thread_rng();
+        self.player.deck.shuffle(&mut rng);
     }
 
+    /// Resolves the players turn of combat. Allows for player of cards with number keys and ending of turn with spacebar.
     fn player_turn(&mut self, ctx: &mut Context) -> GameResult {
         if !self.turn_started {
             self.player.start_turn();
@@ -68,6 +80,9 @@ impl State {
         if !self.player.hand_displayed {
             self.print_game_state();
             self.player.print_hand();
+
+            let end = "Press spacebar to end your turn.".red();
+            println!("{}", end);
             self.player.hand_displayed = true;
         }
 
@@ -93,7 +108,7 @@ impl State {
                     if !self.enemy.is_alive() {
                         self.turn_started = false;
                         self.enemy_turn();
-                        self.player.end_combat();
+                        self.player.combat_cleanup();
                         self.trigger_random_event();
                         return Ok(());
                     }
@@ -103,7 +118,7 @@ impl State {
                 return Ok(());
             }
         }
-        //End Player Turn
+
         if ctx.keyboard.is_key_just_pressed(keyboard::KeyCode::Space) {
             let text = "You end your turn.".yellow();
             println!("{}", text);
@@ -114,6 +129,7 @@ impl State {
         Ok(())
     }
 
+    /// Resolves enemy combat turn. Chooses a random intent from list and resolves it. If enemy is dead a random event is triggered instead.
     fn enemy_turn(&mut self) {
         if self.enemy.hp <= 0 {
             println!("{}", format!("{} Defeated.", self.enemy.name).red());
@@ -139,6 +155,7 @@ impl State {
         }
     }
 
+    /// Outputs an event's information to player. If options present presents them to the player.
     pub fn process_event(&mut self, event: &Event) {
         println!("Event: {}", event.name);
         println!("{}", event.event_flavor_text);
@@ -149,6 +166,7 @@ impl State {
         }
     }
 
+    /// Resolves an event's effects. If options were given then that options effect will be applied.
     pub fn apply_event_effects(&mut self, effect: &EventEffect) {
         match effect {
             EventEffect::GainHP { amount } => self.player.heal(*amount),
@@ -177,6 +195,7 @@ impl State {
         }
     }
 
+    /// Resolves an event from start to finish. Combat will always be triggered at the end of an event.
     fn resolve_event(&mut self, ctx: &mut Context) -> GameResult {
         if let Some(event) = self.current_event.clone() {
             if !self.event_in_progress {

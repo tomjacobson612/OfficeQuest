@@ -1,7 +1,7 @@
 use colored::*;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
-
+#[derive(Clone)]
 pub struct Enemy {
     pub name: String,
     pub hp: i32,
@@ -46,15 +46,39 @@ impl Enemy {
     }
 
     pub fn random_enemy() -> Enemy {
-        Enemy::hr_rep()
+        let enemies = [
+            Enemy::hr_rep(),
+            Enemy::jealous_coworker(),
+            Enemy::horrible_boss(),
+        ];
+        enemies.choose(&mut thread_rng()).unwrap().clone()
     }
 
+    // Specific Enemy Constructors
     pub fn hr_rep() -> Enemy {
         Enemy {
             name: "HR Rep".to_string(),
             hp: 4,
             hp_max: 4,
             actions: vec![Intent::Damage { amount: 1 }, Intent::Healing { amount: 1 }],
+        }
+    }
+
+    pub fn jealous_coworker() -> Enemy {
+        Enemy {
+            name: "Jealous Coworker".to_string(),
+            hp: 7,
+            hp_max: 7,
+            actions: vec![Intent::Damage { amount: 3 }, Intent::Healing { amount: 2 }],
+        }
+    }
+
+    pub fn horrible_boss() -> Enemy {
+        Enemy {
+            name: "Horrible Boss".to_string(),
+            hp: 10,
+            hp_max: 10,
+            actions: vec![Intent::Damage { amount: 4 }, Intent::Healing { amount: 3 }],
         }
     }
 }

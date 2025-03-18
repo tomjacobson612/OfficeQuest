@@ -28,6 +28,7 @@ pub struct EventOption {
 }
 
 impl Event {
+    // Specific Event Constructors
     pub fn skip_lunch() -> Event {
         Event {
             name: "Skip Lunch".to_string(),

@@ -11,10 +11,11 @@ pub struct Card {
 #[derive(Debug, PartialEq, Clone)]
 pub enum CardType {
     Basic,
-    Persistant,
+    _Persistant,
 }
 
 impl Card {
+    /// Print's all card fields for debugging purposes.
     pub fn _print_all(&self) {
         println!("Card Name: {}", self.name);
         println!("Mana Cost: {}", self.mana_cost);
@@ -24,6 +25,7 @@ impl Card {
         println!("Flavor Text: \"{}\"", self.flavor_text);
     }
 
+    /// Print's only card fields relevant to player.
     pub fn print_player_view(&self) {
         println!("Card Name: {}", self.name);
         println!("Mana Cost: {}", self.mana_cost);
@@ -31,7 +33,7 @@ impl Card {
         println!("Flavor Text: \"{}\"", self.flavor_text);
     }
 
-    //Specific Card Constructors
+    // Specific Card Constructors
     pub fn friday_meeting() -> Card {
         Card {
             card_type: CardType::Basic,
@@ -48,7 +50,7 @@ impl Card {
         Card {
             card_type: CardType::Basic,
             name: "Pizza Party".to_string(),
-            mana_cost: 2,
+            mana_cost: 1,
             damage: 0,
             self_damage: -2,
             textbox: "Heal 2hp.".to_string(),
@@ -57,9 +59,21 @@ impl Card {
         }
     }
 
-    pub fn water_cooler() -> Card {
+    pub fn talk_to_manager() -> Card {
         Card {
-            card_type: CardType::Persistant,
+            card_type: CardType::Basic,
+            name: "Talk to your manager.".to_string(),
+            mana_cost: 3,
+            damage: 5,
+            self_damage: 0,
+            textbox: "Deal 5 damage".to_string(),
+            flavor_text: "The one thing all men fear is their manager.".to_string(),
+        }
+    }
+
+    pub fn _water_cooler() -> Card {
+        Card {
+            card_type: CardType::_Persistant,
             name: "Water Cooler".to_string(),
             mana_cost: 3,
             damage: 0,

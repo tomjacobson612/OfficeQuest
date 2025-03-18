@@ -17,8 +17,7 @@ pub struct Player {
 }
 
 impl Player {
-    #[allow(dead_code)]
-    pub fn print_deck(&self) {
+    pub fn _print_deck(&self) {
         println!("{}'s Deck:", self.name);
         for card in &self.deck {
             card.print_player_view();
@@ -26,8 +25,7 @@ impl Player {
         }
     }
 
-    #[allow(dead_code)]
-    pub fn print_discard(&self) {
+    pub fn _print_discard(&self) {
         println!("{}'s Discard:", self.name);
         for card in &self.discard {
             card.print_player_view();
@@ -39,7 +37,8 @@ impl Player {
         let mut position: u32 = 1;
         println!("{}'s Hand:", self.name);
 
-        let divider = "-------------------------------------------------------------------".cyan();
+        let divider =
+            "----------------------------------------------------------------------".cyan();
         let header_footer =
             "**********************************************************************".cyan();
         println!("{}", header_footer);
@@ -63,8 +62,8 @@ impl Player {
             println!("{}", text);
         } else {
             self.energy -= card.mana_cost;
-            self.take_damage(card.self_damage);
             enemy.take_damage(card.damage);
+            self.heal(card.self_damage);
             self.discard.push(card);
         }
     }
@@ -80,7 +79,7 @@ impl Player {
     }
 
     pub fn heal(&mut self, amount: i32) {
-        self.hp = (self.hp + amount).min(self.hp_max);
+        self.hp = (self.hp - amount).min(self.hp_max);
     }
 
     pub fn draw_cards(&mut self, num_cards: usize) {
@@ -110,7 +109,9 @@ impl Player {
         self.hand_displayed = false;
     }
 
-    pub fn end_combat(&mut self) {
+    /// Cleans up player states at end of combat. Shuffles hand and discard pile back into deck.
+    /// It also resets the hand displayed status.
+    pub fn combat_cleanup(&mut self) {
         self.deck.append(&mut self.hand);
         self.deck.append(&mut self.discard);
 
@@ -130,10 +131,11 @@ impl Player {
             deck: vec![
                 Card::friday_meeting(),
                 Card::pizza_party(),
-                Card::water_cooler(),
                 Card::friday_meeting(),
                 Card::pizza_party(),
-                Card::water_cooler(),
+                Card::friday_meeting(),
+                Card::pizza_party(),
+                Card::talk_to_manager(),
             ],
             discard: vec![],
             hand_displayed: false,
