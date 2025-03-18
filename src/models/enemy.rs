@@ -82,3 +82,29 @@ impl Enemy {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_is_alive_true() {
+        let enemy = Enemy::hr_rep();
+        assert!(enemy.is_alive());
+    }
+
+    #[test]
+    fn test_take_damage_success() {
+        let mut enemy = Enemy::jealous_coworker();
+        enemy.take_damage(3);
+        assert_eq!(enemy.hp, 4);
+    }
+
+    #[test]
+    fn test_heal_success() {
+        let mut enemy = Enemy::horrible_boss();
+        enemy.take_damage(5);
+        enemy.heal(3);
+        assert_eq!(enemy.hp, 8);
+    }
+}

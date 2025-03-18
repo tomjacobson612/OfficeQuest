@@ -143,3 +143,62 @@ impl Player {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_is_alive_true() {
+        let player = Player::create_test_player();
+        assert!(player.is_alive());
+    }
+
+    #[test]
+    fn test_is_alive_false() {
+        let mut player = Player::create_test_player();
+        player.take_damage(10);
+        assert!(!player.is_alive());
+    }
+
+    #[test]
+    fn test_take_damage_success() {
+        let mut player = Player::create_test_player();
+        player.take_damage(3);
+        assert_eq!(player.hp, 7);
+    }
+
+    #[test]
+    fn test_heal_success() {
+        let mut player = Player::create_test_player();
+        player.take_damage(5);
+        player.heal(-3);
+        assert_eq!(player.hp, 8);
+    }
+
+    #[test]
+    fn test_draw_cards_success() {
+        let mut player = Player::create_test_player();
+        player.draw_cards(3);
+        assert_eq!(player.hand.len(), 3);
+    }
+
+    #[test]
+    fn test_start_turn_success() {
+        let mut player = Player::create_test_player();
+        player.energy = 0;
+        player.start_turn();
+        assert_eq!(player.energy, 3);
+        assert_eq!(player.hand.len(), 3);
+    }
+
+    #[test]
+    fn test_end_turn_success() {
+        let mut player = Player::create_test_player();
+        player.draw_cards(3);
+        player.end_turn();
+        assert_eq!(player.hand.len(), 0);
+        assert_eq!(player.discard.len(), 3);
+        assert_eq!(player.hand_displayed, false);
+    }
+}

@@ -72,6 +72,13 @@ impl State {
 
     /// Resolves the players turn of combat. Allows for player of cards with number keys and ending of turn with spacebar.
     fn player_turn(&mut self, ctx: &mut Context) -> GameResult {
+        if !self.player.is_alive() {
+            let game_over = "You died.".red();
+            println!("{}", game_over);
+            self.state = GameState::GameOver;
+            return Ok(());
+        }
+
         if !self.turn_started {
             self.player.start_turn();
             self.turn_started = true;
@@ -286,5 +293,35 @@ impl ggez::event::EventHandler<GameError> for State {
 
     fn draw(&mut self, _ctx: &mut Context) -> GameResult {
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_start_combat_success() {
+        let mut state = State::create_test_state(Player::create_test_player(), Enemy::hr_rep());
+        state.start_combat();
+        assert_eq!(state.state, GameState::Combat);
+        assert_eq!(state.turn, Some(Turn::PlayerTurn));
+    }
+
+    #[test]
+    fn test_enemy_turn_deal_damage_success() {
+        let mut state = State::create_test_state(Player::create_test_player(), Enemy::hr_rep());
+        state.enemy.actions = vec![Intent::Damage { amount: 2 }];
+        state.enemy_turn();
+        assert_eq!(state.player.hp, 8);
+        assert_eq!(state.turn, Some(Turn::PlayerTurn));
+    }
+
+    #[test]
+    fn test_enemy_turn_heal_success() {
+        let mut state = State::create_test_state(Player::create_test_player(), Enemy::hr_rep());
+        state.enemy.actions = vec![Intent::Healing { amount: 1 }];
+        state.enemy.take_damage(2);
+        state.enemy_turn();
+        assert_eq!(state.enemy.hp, 3);
     }
 }
